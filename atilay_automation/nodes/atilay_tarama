@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+
+import rospy
+import math
+from atilay_msg.msg import Hareket
+
+
+
+def tarayici(data):
+		pub=rospy.Publisher('atilay/hareket', Hareket, queue_size=10)
+		hareket=Hareket()
+
+		if hareket.searchmode=0  
+			rest()
+		if hareket.searchmode=1
+			hareket.state2.linear(x,y,z)= 0
+			hareket.state2.linear(x,y,z)= 0
+
+		rospy.loginfo(hareket)
+		pub.publish(hareket)
+
+
+def tarama():
+  rospy.init_node('taramapaketi', anonymous=True) 
+  rospy.Subscriber("atilay/hareket", Hareket, tarayici)
+  rate=rospy.Rate(100)
+  while not rospy.is_shutdown():
+    rate.sleep()
+
+if __name__ == '__main__':
+   try:
+    tarama()
+   except rospy.ROSInterruptException:
+    pass

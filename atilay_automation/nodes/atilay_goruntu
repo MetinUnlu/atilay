@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+
+import rospy
+import math
+from camera_msg.msg import Frames #camera bilgilerini hangi formatta alırız daha bilmiyorum, ama buna benzer şekilde elde edilecektir
+from atilay_msg.msg import Hareket
+
+
+def goruntu(data):
+  pub=rospy.Publisher('atilay/hareket', Hareket, queue_size=10)
+	goruntu=data.frames #aşağıdan gelen bilgiyi data içerisinde alıp, data.frames yöntemi ile bir değişkene atıyoruz
+	hareket=Hareket() #Hareket msg bilgi içeriklerini bir değişkene atıyoruz
+	hareket.searchmode=1 #Normal şartlarda araç arama modunda kalması sağlaması için atanır
+
+	#Bu kısımda görüntü işleme takımı tarafından yapılan kodlar bulunacaktır, goruntu olarak atadığımız camera feedbacki, görüntü işlemenin kodlarında kullanılacak ve output elde edilecektir. 
+
+	if hedef_tespit=1 #Bu "if", sadece görüntü algılama paketinde aranan hedefin bulunmasını temsil etmektedir
+		hareket.searchmode=0 #Arama modunu durdurmak içindir
+		hareket.state1.linear(x,y,z)= #Burada yapmak istediğimiz hareket bilgileri bulunacak, oransal hız kontrolü hedeflenmelidir
+		hareket.state1.angular(x,y,z)= #Burada yapmak istediğimiz hareket bilgileri bulunacak, oransal hız kontrolü hedeflenmelidir
+	
+	eğer engel_tespit=1 #Duvar tespiti içindir, aynı şekilde görüntü işlemeden gelen duvar tespiti temsil etmektedir sadece
+		hareket.urgent.factor=1
+
+  rospy.loginfo(hareket)
+  pub.publish(hareket)
+
+
+def goruntupaketi():
+  rospy.init_node('goruntupaketi', anonymous=True) 
+  rospy.Subscriber("atilay/camera", Frames, goruntu) #burada atilay/camera görüntü bilgisini içeren topicten, frame bilgileri alacaktır, bu bilgileri goruntu fonksiyonuna gönderecektir
+  rate=rospy.Rate(100)
+  while not rospy.is_shutdown():
+    rate.sleep()
+
+if __name__ == '__main__':
+   try:
+    goruntupaketi()
+   except rospy.ROSInterruptException:
+    pass

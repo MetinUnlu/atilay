@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+
+import rospy
+import math
+from atilay_msg.msg import Hareket
+from geometry_msgs.msg import Twist
+
+
+def hareket_kontrol(data):
+		pub=rospy.Publisher('atilay/cmd_vel', Twist, queue_size=10)
+		hareket=data()
+		twist=Twist()
+
+
+		hareket.state2.linear(x,y,z)=hareket.state2.linear(x,y,z)*hareket.searchmode*hareket.urgent.factor
+		hareket.state2.angular(x,y,z)=hareket.state2.angular(x,y,z)*hareket.searchmode*hareket.urgent.factor
+
+
+		# Yuzdeleri bulmak icin her koordinattaki hizin toplami
+		toplam.linear.x=hareket.state1.linear.x+hareket.state2.linear.x+hareket.state3.linear.x
+		toplam.angular.x=hareket.state1.angular.x+hareket.state2.angular.x+hareket.state3.angular.x
+
+		toplam.linear.y=hareket.state1.linear.y+hareket.state2.linear.y+hareket.state3.linear.y
+		toplam.angular.y=hareket.state1.angular.y+hareket.state2.angular.y+hareket.state3.angular.y
+
+		toplam.linear.z=hareket.state1.linear.z+hareket.state2.linear.z+hareket.state3.linear.z
+		toplam.angular.z=hareket.state1.angular.z+hareket.state2.angular.z+hareket.state3.angular.z
+
+		twist.linear.x=(hareket.state1.linear.x^2+hareket.state2.linear.x^2+hareket.state3.linear.x^2)/toplam.linear.x
+
+		twist.linear.y=(hareket.state1.linear.y^2+hareket.state2.linear.y^2+hareket.state3.linear.y^2)/toplam.linear.y
+
+		twist.linear.z=(hareket.state1.linear.z^2+hareket.state2.linear.z^2+hareket.state3.linear.z^2)/toplam.linear.z
+
+		twist.angular.x=(hareket.state1.angular.x^2+hareket.state2.angular.x^2+hareket.state3.angular.x^2)/toplam.angular.x
+
+		twist.angular.y=(hareket.state1.angular.y^2+hareket.state2.angular.y^2+hareket.state3.angular.y^2)/toplam.angular.y
+
+		twist.angular.z=(hareket.state1.angular.z^2+hareket.state2.angular.z^2+hareket.state3.angular.z^2)/toplam.angular.z
+
+
+		rospy.loginfo(twist)
+		pub.publish(twist)
+
+def hareket():
+  rospy.init_node('kontrolpaketi', anonymous=True) 
+  rospy.Subscriber("atilay/hareket", Hareket, hareket_kontrol) 
+
+  rate=rospy.Rate(100)
+  while not rospy.is_shutdown():
+    rate.sleep()
+
+if __name__ == '__main__':
+   try:
+    hareket()
+   except rospy.ROSInterruptException:
+    pass

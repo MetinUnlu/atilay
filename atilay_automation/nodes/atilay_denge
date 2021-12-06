@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+
+import rospy
+import math
+from atilay_msg.msg import Hareket
+from sensor_msgs.msg import Imu
+
+
+def dengeleyici(data):
+  pub=rospy.Publisher('atilay/hareket', Hareket, queue_size=10)
+	orientation= data.orientation
+	roll=orientation.x
+	pitch=orientation.y
+	angular_vel=data.angular_velocity
+	linear_acc=data.linear_acceleration #Imudan gelen dataları değişkenlere atadık, aynı zamanda Imudan covarince değerleri gelmektedir, bunları error tespiti için kullanabiliriz
+	hareket=Hareket()
+	if roll>0.15:
+		hareket.state3.angular.y=-0.2 #tamamen basit bir denge örneğidir, y'e göre 0.15 radyan bozukluk olması durumunda ters yönde -0.2 m/sn açısal dönme hızı sağlanır, bundan daha komplike denge algoritmaları hem roll hem pitch için yazılacaktır.
+
+	rospy.loginfo(hareket)
+	pub.publish(hareket)
+
+def denge():
+  rospy.init_node('dengepaketi', anonymous=True) 
+  rospy.Subscriber("atilay/imu", Imu, dengeleyici) #burada imu sensorlar topic'i dinlenerek aracın denge değerleri takip edilecektir
+  rate=rospy.Rate(100)
+  while not rospy.is_shutdown():
+    rate.sleep()
+
+if __name__ == '__main__':
+   try:
+    denge()
+   except rospy.ROSInterruptException:
+    pass
